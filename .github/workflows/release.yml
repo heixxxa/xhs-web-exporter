@@ -32,21 +32,18 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: List dist files
+        run: ls -la dist/
+
       - name: Generate changelog
         run: npm run changelog
-        if: startsWith(github.ref, 'refs/tags/v')
-
-      - name: Get version from tag
-        id: tag_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/')
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: CHANGELOG.md
-          files: |
-            dist/xhs-web-exporter.user.js
+          files: dist/*.user.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
