@@ -35,6 +35,17 @@ jobs:
       - name: List dist files
         run: ls -la dist/
 
+      - name: Check file size
+        run: |
+          if [ -f dist/xhs-web-exporter.user.js ]; then
+            echo "File exists!"
+            file dist/xhs-web-exporter.user.js
+            wc -c dist/xhs-web-exporter.user.js
+          else
+            echo "File NOT found!"
+            ls -la dist/
+          fi
+
       - name: Generate changelog
         run: npm run changelog
         if: startsWith(github.ref, 'refs/tags/')
