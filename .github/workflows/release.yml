@@ -38,12 +38,12 @@ jobs:
       - name: Generate changelog
         run: npm run changelog
         if: startsWith(github.ref, 'refs/tags/')
+        continue-on-error: true
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          body_path: CHANGELOG.md
           files: dist/*.user.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
