@@ -1,4 +1,5 @@
 # XHS Web Exporter
+小红书油泼猴插件
 ![alt text](image.png)![alt text](image-1.png)![alt text](image-2.png)![alt text](image-3.png)
 **Export notes, comments and much more from Xiaohongshu (Little Red Book) web app.**
 
@@ -16,4 +17,4 @@
 ## Installation
 
 1. Install the browser extension [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/)
-2. install the user script
+2. Click [HERE](https://github.com/xiaoyihao001018/xhs-web-exporter/releases/latest/download/xhs-web-exporter.user.js) to install the user script
