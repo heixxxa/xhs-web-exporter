@@ -1,6 +1,6 @@
 // src/modules/xhs-comments/index.tsx
-import { h } from 'preact';
 import { Extension, ExtensionType } from '@/core/extensions';
+import { ExportMediaModal } from '@/components/modals/export-media';
 import { XHSComment } from '@/types/xhs';
 import { XHSCommentsInterceptor } from './api';
 import { ExtensionPanel, Modal } from '@/components/common';
@@ -20,19 +20,16 @@ export default class XHSCommentsModule extends Extension {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
-    return function (props: { extension: Extension }) {
+    return function () {
       const { t } = useTranslation();
       const [showModal, toggleShowModal] = useToggle();
+      const [showExportMediaModal, toggleShowExportMediaModal] = useToggle();
 
       const count = useCaptureCount(self.name);
       const records = useCapturedRecords(self.name, self.type);
       const clearCapturedData = useClearCaptures(self.name);
 
-      const title = '小红书评论区'; 
-      
-      const onExportMedia = () => {
-          alert('Not implemented yet');
-      };
+      const title = '小红书评论区';
 
       return (
         <ExtensionPanel
@@ -40,7 +37,7 @@ export default class XHSCommentsModule extends Extension {
           description={`${t('Captured:')} ${count}`}
           active={!!count && (count as number) > 0}
           onClick={toggleShowModal}
-          indicatorColor="bg-info" 
+          indicatorColor="bg-info"
         >
           <Modal
             class="max-w-4xl md:max-w-screen-md sm:max-w-screen-sm min-h-[512px]"
@@ -48,16 +45,25 @@ export default class XHSCommentsModule extends Extension {
             show={showModal}
             onClose={toggleShowModal}
           >
-             <BaseTableView
-                title={title}
-                records={(records as XHSComment[]) ?? []}
-                columns={columns}
-                clear={clearCapturedData}
-                renderActions={() => (
-                    <button class="btn btn-secondary" onClick={onExportMedia}>
-                    {t('Export Media')}
-                    </button>
-                )}
+            <BaseTableView
+              title={title}
+              records={(records as XHSComment[]) ?? []}
+              columns={columns}
+              clear={clearCapturedData}
+              renderActions={() => (
+                <button class="btn btn-secondary" onClick={toggleShowExportMediaModal}>
+                  {t('Export Media')}
+                </button>
+              )}
+              renderExtra={(table) => (
+                <ExportMediaModal
+                  title={title}
+                  table={table}
+                  context="comment"
+                  show={showExportMediaModal}
+                  onClose={toggleShowExportMediaModal}
+                />
+              )}
             />
           </Modal>
         </ExtensionPanel>

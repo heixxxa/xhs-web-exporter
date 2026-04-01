@@ -20,9 +20,13 @@ type TableViewProps = {
   extension: Extension;
 };
 
-type InferDataType<T> = T extends ExtensionType.TWEET ? Tweet : T extends ExtensionType.USER ? User : T extends ExtensionType.NOTE ? XHSNote : XHSComment;
-
-
+type InferDataType<T> = T extends ExtensionType.TWEET
+  ? Tweet
+  : T extends ExtensionType.USER
+    ? User
+    : T extends ExtensionType.NOTE
+      ? XHSNote
+      : XHSComment;
 
 /**
  * Common table view.
@@ -42,7 +46,13 @@ export function TableView({ title, extension }: TableViewProps) {
   const [showExportMediaModal, toggleShowExportMediaModal] = useToggle();
 
   const columns = (
-    type === ExtensionType.TWEET ? columnsTweet : type === ExtensionType.USER ? columnsUser : type === ExtensionType.COMMENT ? columnsComment : []
+    type === ExtensionType.TWEET
+      ? columnsTweet
+      : type === ExtensionType.USER
+        ? columnsUser
+        : type === ExtensionType.COMMENT
+          ? columnsComment
+          : []
   ) as ColumnDef<DataType>[];
 
   return (
@@ -60,7 +70,7 @@ export function TableView({ title, extension }: TableViewProps) {
         <ExportMediaModal
           title={title}
           table={table}
-          isTweet={type === ExtensionType.TWEET}
+          context={type === ExtensionType.USER ? 'user' : 'tweet'}
           show={showExportMediaModal}
           onClose={toggleShowExportMediaModal}
         />

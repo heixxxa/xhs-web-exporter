@@ -28,7 +28,6 @@ export class ExtensionManager {
   public signal = new Signal(1);
 
   constructor() {
-    this.installHttpHooks();
     this.disabledExtensions = new Set(options.get('disabledExtensions', []));
 
     // Do some extra logging when debug mode is enabled.
@@ -36,6 +35,8 @@ export class ExtensionManager {
       this.debugEnabled = true;
       logger.info('Debug mode enabled');
     }
+
+    this.installHttpHooks();
   }
 
   /**

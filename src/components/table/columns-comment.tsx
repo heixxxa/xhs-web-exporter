@@ -1,5 +1,4 @@
 // src/components/table/columns-comment.tsx
-import { h } from 'preact';
 import { createColumnHelper } from '@tanstack/table-core';
 import { XHSComment } from '@/types/xhs';
 
@@ -71,7 +70,7 @@ export const columns = [
           </div>
         )}
       </div>
-    )
+    ),
   }),
   // Likes
   columnHelper.accessor('like_count', {
@@ -82,9 +81,9 @@ export const columns = [
   columnHelper.accessor('upload_time', {
     header: 'Date',
     cell: (info) => {
-        const time = info.getValue();
-        if (!time) return '-';
-        return <div class="text-xs">{new Date(time).toLocaleString()}</div>;
+      const time = info.getValue();
+      if (!time) return '-';
+      return <div class="text-xs">{new Date(time).toLocaleString()}</div>;
     },
   }),
 ];

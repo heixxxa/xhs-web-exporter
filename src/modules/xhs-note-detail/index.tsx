@@ -1,6 +1,6 @@
 // src/modules/xhs-note-detail/index.tsx
-import { h } from 'preact';
 import { Extension, ExtensionType } from '@/core/extensions';
+import { ExportMediaModal } from '@/components/modals/export-media';
 import { XHSNote } from '@/types/xhs';
 import { XHSNoteDetailInterceptor } from './api';
 import { ExtensionPanel, Modal } from '@/components/common';
@@ -20,19 +20,16 @@ export default class XHSNoteDetailModule extends Extension {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
-    return function (props: { extension: Extension }) {
+    return function () {
       const { t } = useTranslation();
       const [showModal, toggleShowModal] = useToggle();
+      const [showExportMediaModal, toggleShowExportMediaModal] = useToggle();
 
       const count = useCaptureCount(self.name);
       const records = useCapturedRecords(self.name, self.type);
       const clearCapturedData = useClearCaptures(self.name);
 
-      const title = '小红书笔记详情 (Full)'; 
-      
-      const onExportMedia = () => {
-          alert('Not implemented yet');
-      };
+      const title = '小红书笔记详情 (Full)';
 
       return (
         <ExtensionPanel
@@ -40,7 +37,7 @@ export default class XHSNoteDetailModule extends Extension {
           description={`${t('Captured:')} ${count}`}
           active={!!count && (count as number) > 0}
           onClick={toggleShowModal}
-          indicatorColor="bg-warning" 
+          indicatorColor="bg-warning"
         >
           <Modal
             class="max-w-4xl md:max-w-screen-md sm:max-w-screen-sm min-h-[512px]"
@@ -48,16 +45,25 @@ export default class XHSNoteDetailModule extends Extension {
             show={showModal}
             onClose={toggleShowModal}
           >
-             <BaseTableView
-                title={title}
-                records={(records as XHSNote[]) ?? []}
-                columns={columns}
-                clear={clearCapturedData}
-                renderActions={() => (
-                    <button class="btn btn-secondary" onClick={onExportMedia}>
-                    {t('Export Media')}
-                    </button>
-                )}
+            <BaseTableView
+              title={title}
+              records={(records as XHSNote[]) ?? []}
+              columns={columns}
+              clear={clearCapturedData}
+              renderActions={() => (
+                <button class="btn btn-secondary" onClick={toggleShowExportMediaModal}>
+                  {t('Export Media')}
+                </button>
+              )}
+              renderExtra={(table) => (
+                <ExportMediaModal
+                  title={title}
+                  table={table}
+                  context="note"
+                  show={showExportMediaModal}
+                  onClose={toggleShowExportMediaModal}
+                />
+              )}
             />
           </Modal>
         </ExtensionPanel>

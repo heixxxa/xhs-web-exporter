@@ -17,8 +17,8 @@ import {
   Table,
 } from '@tanstack/table-core';
 
-import { Pagination } from './pagination';
 import { ExportDataModal } from '../modals/export-data';
+import { Pagination } from './pagination';
 
 // For opening media preview modal in column definitions.
 declare module '@tanstack/table-core' {

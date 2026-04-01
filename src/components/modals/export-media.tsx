@@ -10,23 +10,47 @@ import {
 } from '@tabler/icons-preact';
 
 import { FileLike, ProgressCallback, zipStreamDownload } from '@/utils/download';
-import { DEFAULT_MEDIA_TYPES, extractMedia, patterns } from '@/utils/media';
+import {
+  DEFAULT_MEDIA_TYPES,
+  ExportMediaContext,
+  ExportableMediaType,
+  USER_MEDIA_TYPES,
+  XHS_MEDIA_TYPES,
+  extractMedia,
+  patterns,
+} from '@/utils/media';
 import { Modal, MultiSelect } from '@/components/common';
 import { options } from '@/core/options';
 import { TranslationKey, useTranslation } from '@/i18n';
-import { Media, Tweet, User } from '@/types';
+import { Tweet, User } from '@/types';
+import { XHSComment, XHSNote } from '@/types/xhs';
 import { useSignalState, cx, useToggle } from '@/utils/common';
 import logger from '@/utils/logger';
 
 type ExportMediaModalProps<T> = {
   title: string;
   table: Table<T>;
-  isTweet?: boolean;
+  context?: ExportMediaContext;
   show?: boolean;
   onClose?: () => void;
 };
 
-type MediaFilterType = Media['type'] | 'retweet';
+type MediaFilterType = ExportableMediaType | 'retweet';
+
+function sanitizeDownloadFilename(value: string) {
+  const sanitized = Array.from(value)
+    .map((char) => {
+      if (char.charCodeAt(0) < 32 || /[<>:"/\\|?*]/.test(char)) {
+        return '_';
+      }
+
+      return char;
+    })
+    .join('')
+    .trim();
+
+  return sanitized || 'media';
+}
 
 /**
  * Modal for exporting media.
@@ -34,11 +58,27 @@ type MediaFilterType = Media['type'] | 'retweet';
 export function ExportMediaModal<T>({
   title,
   table,
-  isTweet,
+  context = 'tweet',
   show,
   onClose,
 }: ExportMediaModalProps<T>) {
   const { t } = useTranslation('exporter');
+  const showFilenameTemplate = context === 'tweet';
+  const supportsRetweets = context === 'tweet';
+  const supportedMediaTypes =
+    context === 'user'
+      ? USER_MEDIA_TYPES
+      : context === 'note' || context === 'comment'
+        ? XHS_MEDIA_TYPES
+        : DEFAULT_MEDIA_TYPES;
+  const mediaDescription =
+    context === 'note' || context === 'comment'
+      ? t(
+          'Download and save media files referenced by the selected notes or comments. This may take a while depending on the amount of data. Media that will be downloaded includes note images, videos, and comment pictures.',
+        )
+      : t(
+          'Download and save media files from captured data. This may take a while depending on the amount of data. Media that will be downloaded includes: profile images, profile banners (for users), images, videos (for tweets).',
+        );
 
   const [loading, setLoading] = useSignalState(false);
   const [copied, setCopied] = useSignalState(false);
@@ -52,13 +92,18 @@ export function ExportMediaModal<T>({
 
   // Media type filters.
   const [filters, setFilters] = useSignalState<MediaFilterType[]>([
-    ...DEFAULT_MEDIA_TYPES,
-    ...(isTweet ? ['retweet' as const] : []),
+    ...supportedMediaTypes,
+    ...(supportsRetweets ? ['retweet' as const] : []),
   ]);
 
   const includeRetweets = filters.includes('retweet');
+  const archiveFilename = `media-${sanitizeDownloadFilename(title)}-${Date.now()}.zip`;
   const mediaList = extractMedia(
-    table.getSelectedRowModel().rows.map((row) => row.original) as Tweet[] | User[],
+    table.getSelectedRowModel().rows.map((row) => row.original) as
+      | Tweet[]
+      | User[]
+      | XHSNote[]
+      | XHSComment[],
     includeRetweets,
     filenamePattern ?? '',
   ).filter((media) => filters.includes(media.type as MediaFilterType));
@@ -75,8 +120,11 @@ export function ExportMediaModal<T>({
 
   const onExport = async () => {
     try {
+      setCurrentProgress(0);
+      setTotalProgress(mediaList.length);
+      taskStatusSignal.value = {};
       setLoading(true);
-      await zipStreamDownload(`twitter-${title}-${Date.now()}-media.zip`, mediaList, onProgress);
+      await zipStreamDownload(archiveFilename, mediaList, onProgress, rateLimit);
       setLoading(false);
     } catch (err) {
       setLoading(false);
@@ -112,11 +160,7 @@ export function ExportMediaModal<T>({
     >
       {/* Modal content. */}
       <div class="px-4 text-base overflow-y-scroll overscroll-none">
-        <p class="text-base-content text-opacity-60 leading-5 text-sm">
-          {t(
-            'Download and save media files from captured data. This may take a while depending on the amount of data. Media that will be downloaded includes: profile images, profile banners (for users), images, videos (for tweets).',
-          )}
-        </p>
+        <p class="text-base-content text-opacity-60 leading-5 text-sm">{mediaDescription}</p>
         <div role="alert" class="alert text-sm py-2 mt-2 mb-2 grid-cols-[auto_minmax(auto,1fr)]">
           <IconInfoCircle size={24} />
           <span>
@@ -126,7 +170,7 @@ export function ExportMediaModal<T>({
           </span>
         </div>
         {/* Export options. */}
-        {isTweet && (
+        {showFilenameTemplate && (
           <div class="flex flex-wrap sm:grid grid-cols-4 sm:gap-2 items-center sm:h-9">
             <p class="leading-8">{t('Filename template:')}</p>
             <div
@@ -185,10 +229,13 @@ export function ExportMediaModal<T>({
           <MultiSelect<MediaFilterType>
             class="col-span-3"
             options={[
-              { label: t('filter.photo'), value: 'photo' },
-              { label: t('filter.video'), value: 'video' },
-              { label: t('filter.animated_gif'), value: 'animated_gif' },
-              ...(isTweet ? [{ label: t('filter.retweet'), value: 'retweet' as const }] : []),
+              ...supportedMediaTypes.map((type) => ({
+                label: t(`filter.${type}` as TranslationKey),
+                value: type,
+              })),
+              ...(supportsRetweets
+                ? [{ label: t('filter.retweet'), value: 'retweet' as const }]
+                : []),
             ]}
             selected={filters}
             onChange={setFilters}
@@ -265,7 +312,10 @@ export function ExportMediaModal<T>({
             <IconFileDownload />
           </button>
         </div>
-        <button class={cx('btn btn-secondary', loading && 'btn-disabled')} onClick={onExport}>
+        <button
+          class={cx('btn btn-secondary', (loading || mediaList.length === 0) && 'btn-disabled')}
+          onClick={onExport}
+        >
           {loading && <span class="loading loading-spinner" />}
           {t('Start Export')}
         </button>

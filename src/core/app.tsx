@@ -68,10 +68,16 @@ export function App() {
         {/* Card title. */}
         <header class="flex items-center h-9">
           <IconBook class="mr-2 min-w-6" />
-          <h2 class="font-semibold leading-none text-xl m-0 flex-grow whitespace-nowrap overflow-hidden text-ellipsis">XHS Exporter</h2>
+          <h2 class="font-semibold leading-none text-xl m-0 flex-grow whitespace-nowrap overflow-hidden text-ellipsis">
+            XHS Exporter
+          </h2>
           <div
             onClick={async () => {
-              if (confirm('Are you sure you want to clear all captured data? This action cannot be undone.')) {
+              if (
+                confirm(
+                  'Are you sure you want to clear all captured data? This action cannot be undone.',
+                )
+              ) {
                 await db.clearAllData();
                 location.reload();
               }

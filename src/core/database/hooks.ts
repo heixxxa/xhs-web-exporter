@@ -10,7 +10,10 @@ export function useCaptureCount(extName: string) {
 }
 
 export function useCapturedRecords(extName: string, type: ExtensionType) {
-  return useLiveQuery<Tweet[] | User[] | XHSNote[] | XHSComment[] | void, Tweet[] | User[] | XHSNote[] | XHSComment[] | void>(
+  return useLiveQuery<
+    Tweet[] | User[] | XHSNote[] | XHSComment[] | void,
+    Tweet[] | User[] | XHSNote[] | XHSComment[] | void
+  >(
     () => {
       logger.debug('useCapturedRecords liveQuery re-run', extName);
 

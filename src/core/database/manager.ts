@@ -7,7 +7,6 @@ import { Capture, Tweet, User } from '@/types';
 import { XHSNote, XHSComment } from '@/types/xhs';
 import { extractTweetMedia } from '@/utils/api';
 import { parseTwitterDateTime } from '@/utils/common';
-import { migration_20250609 } from '@/utils/migration';
 import logger from '@/utils/logger';
 import { ExtensionType } from '../extensions';
 import { options } from '../options';
@@ -157,11 +156,7 @@ export class DatabaseManager {
       return [];
     }
     const noteIds = captures.map((capture) => capture.data_key);
-    return this.xhsNotes()
-      .where('note_id')
-      .anyOf(noteIds)
-      .toArray()
-      .catch(this.logError);
+    return this.xhsNotes().where('note_id').anyOf(noteIds).toArray().catch(this.logError);
   }
 
   async extAddXHSComments(extName: string, comments: XHSComment[]) {
@@ -184,11 +179,7 @@ export class DatabaseManager {
       return [];
     }
     const commentIds = captures.map((capture) => capture.data_key);
-    return this.xhsComments()
-      .where('comment_id')
-      .anyOf(commentIds)
-      .toArray()
-      .catch(this.logError);
+    return this.xhsComments().where('comment_id').anyOf(commentIds).toArray().catch(this.logError);
   }
 
   /*
@@ -382,7 +373,7 @@ export class DatabaseManager {
           xhs_notes: xhsNoteIndexPaths.join(','),
           xhs_comments: xhsCommentIndexPaths.join(','),
         })
-        .upgrade(async (tx) => {
+        .upgrade(async () => {
           logger.info('Upgrading database schema...');
           // await migration_20250609(tx); // No migrations needed for now since we upped version.
           logger.info('Database upgraded');

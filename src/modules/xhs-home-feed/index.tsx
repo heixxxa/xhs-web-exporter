@@ -1,28 +1,39 @@
-import { h } from 'preact';
-import { Extension, ExtensionType } from '@/core/extensions';
-import { db } from '@/core/database';
-import { XHSNote } from '@/types/xhs';
-import { XHSHomeFeedInterceptor } from './api';
 import { ExtensionPanel, Modal } from '@/components/common';
-import { useTranslation, TranslationKey } from '@/i18n';
-import { useToggle } from '@/utils/common';
-import { useCaptureCount, useCapturedRecords, useClearCaptures } from '@/core/database/hooks';
+import { ExportMediaModal } from '@/components/modals/export-media';
 import { BaseTableView } from '@/components/table/base';
 import { columns } from '@/components/table/columns-note';
+import { useCaptureCount, useCapturedRecords, useClearCaptures } from '@/core/database/hooks';
+import { Extension, ExtensionType } from '@/core/extensions';
+import { useTranslation } from '@/i18n';
+import { XHSNote } from '@/types/xhs';
+import { useToggle } from '@/utils/common';
+import { XHSHomeFeedInterceptor } from './api';
+import { XHSHomeFeedDomCapture } from './dom';
 
 export default class XHSHomeFeedModule extends Extension {
+  private domCapture = new XHSHomeFeedDomCapture(this);
+
   name = 'xhs-home-feed';
   title = 'Proposals';
   type = ExtensionType.NOTE;
   intercept = () => XHSHomeFeedInterceptor;
 
+  public setup() {
+    this.domCapture.start();
+  }
+
+  public dispose() {
+    this.domCapture.stop();
+  }
+
   render = () => {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
-    return function (props: { extension: Extension }) {
+    return function () {
       const { t } = useTranslation();
       const [showModal, toggleShowModal] = useToggle();
+      const [showExportMediaModal, toggleShowExportMediaModal] = useToggle();
 
       // Use the helper hook (assumes we updated it to support NOTE)
       const count = useCaptureCount(self.name);
@@ -30,11 +41,6 @@ export default class XHSHomeFeedModule extends Extension {
       const clearCapturedData = useClearCaptures(self.name);
 
       const title = '小红书首页/搜索 Note'; // Hardcoded for now or add to i18n
-      
-      const onExportMedia = () => {
-          // TODO: Implement media export logic for Notes
-          alert('Not implemented yet');
-      };
 
       return (
         <ExtensionPanel
@@ -50,16 +56,25 @@ export default class XHSHomeFeedModule extends Extension {
             show={showModal}
             onClose={toggleShowModal}
           >
-             <BaseTableView
-                title={title}
-                records={(records as XHSNote[]) ?? []}
-                columns={columns}
-                clear={clearCapturedData}
-                renderActions={() => (
-                    <button class="btn btn-secondary" onClick={onExportMedia}>
-                    {t('Export Media')}
-                    </button>
-                )}
+            <BaseTableView
+              title={title}
+              records={(records as XHSNote[]) ?? []}
+              columns={columns}
+              clear={clearCapturedData}
+              renderActions={() => (
+                <button class="btn btn-secondary" onClick={toggleShowExportMediaModal}>
+                  {t('Export Media')}
+                </button>
+              )}
+              renderExtra={(table) => (
+                <ExportMediaModal
+                  title={title}
+                  table={table}
+                  context="note"
+                  show={showExportMediaModal}
+                  onClose={toggleShowExportMediaModal}
+                />
+              )}
             />
           </Modal>
         </ExtensionPanel>
