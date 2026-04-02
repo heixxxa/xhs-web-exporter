@@ -1,6 +1,6 @@
 {
   "Open Control Panel": "Open Control Panel",
-  "Browse around to capture more data.": "Browse around to capture more data.",
+  "Browse around to capture more data.": "Browse Xiaohongshu pages to capture more data.",
   "Settings": "Settings",
   "General": "General",
   "Theme": "Theme",
@@ -15,6 +15,8 @@
   "Export DB": "Export",
   "Clear DB": "Clear",
   "Are you sure to clear all data in the database?": "Are you sure to clear all data in the database?",
+  "Clear all data": "Clear all data",
+  "Are you sure you want to clear all captured data? This action cannot be undone.": "Are you sure you want to clear all captured data? This action cannot be undone.",
   "Database cleared.": "Database cleared.",
   "Module": "Module",
   "Modules (Scroll to see more)": "Modules (Scroll to see more)",
@@ -45,10 +47,13 @@
   "ListSubscribers": "ListSubscribers",
   "ListTimeline": "ListTimeline",
   "RetweetersModule": "RetweetersModule",
-  "RuntimeLogs": "RuntimeLogs",
+  "RuntimeLogs": "Runtime Logs",
   "SearchTimeline": "SearchTimeline",
   "TweetDetail": "TweetDetail",
   "UserDetail": "UserDetail",
   "UserMedia": "UserMedia",
-  "UserTweets": "UserTweets"
+  "UserTweets": "UserTweets",
+  "xhs-home-feed": "Home Feed & Search",
+  "xhs-note-detail": "Note Details",
+  "xhs-comments": "Comments"
 }

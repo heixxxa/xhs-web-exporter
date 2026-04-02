@@ -4,17 +4,8 @@ import { Interceptor } from '@/core/extensions';
 import { parseXhsNoteDetailResponse } from '@/modules/xhs-shared';
 import logger from '@/utils/logger';
 
-// https://www.xiaohongshu.com/api/sns/web/v1/feed
+// Note detail requests are fetched from this endpoint on the Xiaohongshu web app.
 export const XHSNoteDetailInterceptor: Interceptor = (req, res, ext) => {
-  // Check if API URL path is exactly that (often used for detail via POST/GET)
-  // Usually feed interface returns an array of items, but when opening a detail modal,
-  // it might request this endpoint with a specific note ID in the payload.
-  // Note: Home feed is ALSO this endpoint sometimes or `/homefeed`.
-  // Wait, user provided context shows logs: "XHSHomeFeed: 39 items received".
-  // Home feed is handled.
-  // Detail page url is https://www.xiaohongshu.com/explore/xxxx
-  // The XHR/Fetch for detail is usually `/api/sns/web/v1/feed`.
-
   if (!/\/api\/sns\/web\/v1\/feed/.test(req.url)) {
     return;
   }

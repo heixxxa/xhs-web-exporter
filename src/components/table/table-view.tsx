@@ -8,12 +8,10 @@ import { useToggle } from '@/utils/common';
 import { ColumnDef } from '@tanstack/table-core';
 
 import { BaseTableView } from './base';
+import { columns as columnsComment } from './columns-comment';
+import { columns as columnsNote } from './columns-note';
 import { columns as columnsTweet } from './columns-tweet';
 import { columns as columnsUser } from './columns-user';
-// We need to import comment columns here but for now let's just use empty or assume the component passing props handles it?
-// Wait, TableView selects columns based on type.
-// I should import columnsComment
-import { columns as columnsComment } from './columns-comment';
 
 type TableViewProps = {
   title: string;
@@ -34,7 +32,7 @@ type InferDataType<T> = T extends ExtensionType.TWEET
 export function TableView({ title, extension }: TableViewProps) {
   const { t } = useTranslation();
 
-  // Infer data type (Tweet or User) from extension type.
+  // Infer the record type from the extension type.
   type DataType = InferDataType<typeof extension.type>;
 
   // Query records from the database.
@@ -50,10 +48,21 @@ export function TableView({ title, extension }: TableViewProps) {
       ? columnsTweet
       : type === ExtensionType.USER
         ? columnsUser
-        : type === ExtensionType.COMMENT
-          ? columnsComment
-          : []
+        : type === ExtensionType.NOTE
+          ? columnsNote
+          : type === ExtensionType.COMMENT
+            ? columnsComment
+            : []
   ) as ColumnDef<DataType>[];
+
+  const mediaContext =
+    type === ExtensionType.USER
+      ? 'user'
+      : type === ExtensionType.NOTE
+        ? 'note'
+        : type === ExtensionType.COMMENT
+          ? 'comment'
+          : 'tweet';
 
   return (
     <BaseTableView
@@ -70,7 +79,7 @@ export function TableView({ title, extension }: TableViewProps) {
         <ExportMediaModal
           title={title}
           table={table}
-          context={type === ExtensionType.USER ? 'user' : 'tweet'}
+          context={mediaContext}
           show={showExportMediaModal}
           onClose={toggleShowExportMediaModal}
         />

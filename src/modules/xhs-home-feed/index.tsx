@@ -4,7 +4,7 @@ import { BaseTableView } from '@/components/table/base';
 import { columns } from '@/components/table/columns-note';
 import { useCaptureCount, useCapturedRecords, useClearCaptures } from '@/core/database/hooks';
 import { Extension, ExtensionType } from '@/core/extensions';
-import { useTranslation } from '@/i18n';
+import { TranslationKey, useTranslation } from '@/i18n';
 import { XHSNote } from '@/types/xhs';
 import { useToggle } from '@/utils/common';
 import { XHSHomeFeedInterceptor } from './api';
@@ -14,7 +14,6 @@ export default class XHSHomeFeedModule extends Extension {
   private domCapture = new XHSHomeFeedDomCapture(this);
 
   name = 'xhs-home-feed';
-  title = 'Proposals';
   type = ExtensionType.NOTE;
   intercept = () => XHSHomeFeedInterceptor;
 
@@ -35,12 +34,11 @@ export default class XHSHomeFeedModule extends Extension {
       const [showModal, toggleShowModal] = useToggle();
       const [showExportMediaModal, toggleShowExportMediaModal] = useToggle();
 
-      // Use the helper hook (assumes we updated it to support NOTE)
       const count = useCaptureCount(self.name);
       const records = useCapturedRecords(self.name, self.type);
       const clearCapturedData = useClearCaptures(self.name);
 
-      const title = '小红书首页/搜索 Note'; // Hardcoded for now or add to i18n
+      const title = t(self.name as TranslationKey);
 
       return (
         <ExtensionPanel
@@ -48,7 +46,7 @@ export default class XHSHomeFeedModule extends Extension {
           description={`${t('Captured:')} ${count}`}
           active={!!count && (count as number) > 0}
           onClick={toggleShowModal}
-          indicatorColor="bg-error" // Red for Xiaohongshu
+          indicatorColor="bg-error"
         >
           <Modal
             class="max-w-4xl md:max-w-screen-md sm:max-w-screen-sm min-h-[512px]"

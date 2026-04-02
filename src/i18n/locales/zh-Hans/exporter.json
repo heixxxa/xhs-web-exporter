@@ -55,7 +55,7 @@
   "Cancel": "取消",
   "Start Export": "开始导出",
   "Download and save media files from captured data. This may take a while depending on the amount of data. Media that will be downloaded includes: profile images, profile banners (for users), images, videos (for tweets).": "从捕获的数据中下载并保存媒体文件。这可能需要一些时间，具体取决于数据量。将下载的媒体包括：用户的个人资料图片、个人资料头图、图片、推文中的视频。",
-  "Download and save media files referenced by the selected notes or comments. This may take a while depending on the amount of data. Media that will be downloaded includes note images, videos, and comment pictures.": "下载并保存所选笔记或评论中引用的媒体文件。这可能需要一些时间，具体取决于数据量。将下载的媒体包括：笔记图片、视频以及评论图片。",
+  "Download and save media files referenced by the selected notes or comments. This may take a while depending on the amount of data. Media that will be downloaded includes note images, videos, and comment pictures.": "下载并保存所选笔记或评论中引用的媒体文件。这可能需要一些时间，具体取决于数据量。支持下载笔记图片、视频以及评论图片。",
   "For more than 100 media or large files, it is recommended to copy the URLs and download them with an external download manager such as aria2.": "对于超过 100 个媒体或大文件，建议复制 URL 并使用外部下载管理器（如 aria2）下载。",
   "Filename template:": "文件名模板:",
   "Use aria2 format:": "使用 aria2 格式:",

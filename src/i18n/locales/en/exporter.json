@@ -55,7 +55,7 @@
   "Cancel": "Cancel",
   "Start Export": "Start Export",
   "Download and save media files from captured data. This may take a while depending on the amount of data. Media that will be downloaded includes: profile images, profile banners (for users), images, videos (for tweets).": "Download and save media files from captured data. This may take a while depending on the amount of data. Media that will be downloaded includes: profile images, profile banners (for users), images, videos (for tweets).",
-  "Download and save media files referenced by the selected notes or comments. This may take a while depending on the amount of data. Media that will be downloaded includes note images, videos, and comment pictures.": "Download and save media files referenced by the selected notes or comments. This may take a while depending on the amount of data. Media that will be downloaded includes note images, videos, and comment pictures.",
+  "Download and save media files referenced by the selected notes or comments. This may take a while depending on the amount of data. Media that will be downloaded includes note images, videos, and comment pictures.": "Download and save media files referenced by the selected notes or comments. This may take a while depending on the amount of data. Supported downloads include note images, videos, and comment pictures.",
   "For more than 100 media or large files, it is recommended to copy the URLs and download them with an external download manager such as aria2.": "For more than 100 media or large files, it is recommended to copy the URLs and download them with an external download manager such as aria2.",
   "Filename template:": "Filename template:",
   "Use aria2 format:": "Use aria2 format:",

@@ -22,15 +22,7 @@ export const DEFAULT_APP_OPTIONS: AppOptions = {
   theme: 'system',
   debug: false,
   showControlPanel: true,
-  disabledExtensions: [
-    'HomeTimelineModule',
-    'ListTimelineModule',
-    'ListSubscribersModule',
-    'ListMembersModule',
-    'CommunityMembersModule',
-    'CommunityTimelineModule',
-    'RetweetersModule',
-  ],
+  disabledExtensions: [],
   dateTimeFormat: 'YYYY-MM-DD HH:mm:ss Z',
   filenamePattern: '{screen_name}_{id}_{type}_{num}_{date}.{ext}',
   language: '',
@@ -88,20 +80,6 @@ export class AppOptionsManager {
       ...this.appOptions,
       ...safeJSONParse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}'),
     };
-
-    const oldVersion = this.appOptions.version ?? '';
-    const newVersion = DEFAULT_APP_OPTIONS.version ?? '';
-
-    // Migrate from v1.0 to v1.1.
-    if (newVersion.startsWith('1.1') && oldVersion.startsWith('1.0')) {
-      this.appOptions.disabledExtensions = [
-        ...(this.appOptions.disabledExtensions ?? []),
-        'HomeTimelineModule',
-        'ListTimelineModule',
-      ];
-      logger.info(`App options migrated from v${oldVersion} to v${newVersion}`);
-      setTimeout(() => this.saveAppOptions(), 0);
-    }
 
     this.previous = { ...this.appOptions };
     logger.info('App options loaded', this.appOptions);

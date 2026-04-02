@@ -21,8 +21,8 @@ export async function zipStreamDownload(
   onProgress?: ProgressCallback<FileLike>,
   rateLimit = 1000,
 ) {
-  // NOTE: StreamSaver.js fails on sites with strict Content-Security-Policy (CSP) such as Twitter,
-  // since it uses iframe and service worker to download files. Use file-saver instead here.
+  // NOTE: StreamSaver.js fails on sites with strict Content-Security-Policy (CSP)
+  // because it relies on an iframe and service worker. Use file-saver instead.
   // See: https://github.com/jimmywarting/StreamSaver.js/issues/203
 
   // The data written to this stream will be streamed to the user's browser as a file download.

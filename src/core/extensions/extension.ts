@@ -20,7 +20,7 @@ export type Interceptor = (
 ) => void;
 
 /**
- * Wether the extension works on tweets or users.
+ * Which kind of data the extension works with.
  */
 export enum ExtensionType {
   TWEET = 'tweet',

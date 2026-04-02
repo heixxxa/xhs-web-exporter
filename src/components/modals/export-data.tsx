@@ -3,6 +3,7 @@ import { Modal } from '@/components/common';
 import { TranslationKey, useTranslation } from '@/i18n';
 import { useSignalState, cx, useToggle } from '@/utils/common';
 import { DataType, EXPORT_FORMAT, ExportFormatType, exportData } from '@/utils/exporter';
+import packageJson from '@/../package.json';
 
 type ExportDataModalProps<T> = {
   title: string;
@@ -10,6 +11,15 @@ type ExportDataModalProps<T> = {
   show?: boolean;
   onClose?: () => void;
 };
+
+function sanitizeFilenamePart(value: string) {
+  const sanitized = Array.from(value)
+    .map((char) => (char.charCodeAt(0) < 32 || /[<>:"/\\|?*]/.test(char) ? '_' : char))
+    .join('')
+    .trim();
+
+  return sanitized || 'data';
+}
 
 /**
  * Modal for exporting data.
@@ -78,7 +88,7 @@ export function ExportDataModal<T>({ title, table, show, onClose }: ExportDataMo
     await exportData(
       allRecords,
       selectedFormat,
-      `twitter-${title}-${Date.now()}.${selectedFormat.toLowerCase()}`,
+      `${packageJson.name}-${sanitizeFilenamePart(title)}-${Date.now()}.${selectedFormat.toLowerCase()}`,
       headerTranslations,
     );
     setLoading(false);

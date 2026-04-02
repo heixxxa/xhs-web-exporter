@@ -4,7 +4,7 @@ import { ExportMediaModal } from '@/components/modals/export-media';
 import { XHSNote } from '@/types/xhs';
 import { XHSNoteDetailInterceptor } from './api';
 import { ExtensionPanel, Modal } from '@/components/common';
-import { useTranslation } from '@/i18n';
+import { TranslationKey, useTranslation } from '@/i18n';
 import { useToggle } from '@/utils/common';
 import { useCaptureCount, useCapturedRecords, useClearCaptures } from '@/core/database/hooks';
 import { BaseTableView } from '@/components/table/base';
@@ -12,7 +12,6 @@ import { columns } from '@/components/table/columns-note';
 
 export default class XHSNoteDetailModule extends Extension {
   name = 'xhs-note-detail';
-  title = 'Note Details';
   type = ExtensionType.NOTE;
   intercept = () => XHSNoteDetailInterceptor;
 
@@ -29,7 +28,7 @@ export default class XHSNoteDetailModule extends Extension {
       const records = useCapturedRecords(self.name, self.type);
       const clearCapturedData = useClearCaptures(self.name);
 
-      const title = '小红书笔记详情 (Full)';
+      const title = t(self.name as TranslationKey);
 
       return (
         <ExtensionPanel

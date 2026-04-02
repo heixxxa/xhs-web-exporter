@@ -75,7 +75,9 @@ export function App() {
             onClick={async () => {
               if (
                 confirm(
-                  'Are you sure you want to clear all captured data? This action cannot be undone.',
+                  t(
+                    'Are you sure you want to clear all captured data? This action cannot be undone.',
+                  ),
                 )
               ) {
                 await db.clearAllData();
@@ -83,7 +85,7 @@ export function App() {
               }
             }}
             class="w-9 h-9 cursor-pointer flex justify-center items-center transition-colors duration-200 rounded-full hover:bg-base-200 mr-1 text-error"
-            title="Clear all data"
+            title={t('Clear all data')}
           >
             <IconTrash />
           </div>

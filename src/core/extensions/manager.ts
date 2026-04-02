@@ -104,8 +104,8 @@ export class ExtensionManager {
   }
 
   /**
-   * Here we hooks the browser's XHR method to intercept Twitter's Web API calls.
-   * This need to be done before any XHR request is made.
+   * Hook XHR and fetch so enabled extensions can inspect page API responses.
+   * This needs to be done before any request is made.
    */
   private installHttpHooks() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -184,21 +184,5 @@ export class ExtensionManager {
       return response;
     };
     logger.info('Hooked into Fetch');
-
-    // Check for current execution context.
-    /*
-    // The `webpackChunk_twitter_responsive_web` is injected by the Twitter website.
-    // See: https://violentmonkey.github.io/posts/inject-into-context/
-    setTimeout(() => {
-      if (!('webpackChunk_twitter_responsive_web' in globalObject)) {
-        logger.error(
-          'Error: Wrong execution context detected.\n  ' +
-            'This script needs to be injected into "page" context rather than "content" context.\n  ' +
-            'The XMLHttpRequest hook will not work properly.\n  ' +
-            'See: https://github.com/heixxxa/xhs-web-exporter/issues/19',
-        );
-      }
-    }, 1000);
-    */
   }
 }
