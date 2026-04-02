@@ -195,7 +195,7 @@ export class ExtensionManager {
           'Error: Wrong execution context detected.\n  ' +
             'This script needs to be injected into "page" context rather than "content" context.\n  ' +
             'The XMLHttpRequest hook will not work properly.\n  ' +
-            'See: https://github.com/prinsss/twitter-web-exporter/issues/19',
+            'See: https://github.com/heixxxa/xhs-web-exporter/issues/19',
         );
       }
     }, 1000);

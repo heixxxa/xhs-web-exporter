@@ -38,7 +38,7 @@ class Logger {
     this.error(
       `${msg} (Message: ${err?.message ?? 'none'})\n` +
         '  This may be a problem caused by XHS updates.\n  Please file an issue on GitHub:\n' +
-        '  https://github.com/prinsss/twitter-web-exporter/issues',
+        '  https://github.com/heixxxa/xhs-web-exporter/issues',
       ...args,
     );
   }

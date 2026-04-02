@@ -18,4 +18,4 @@
 ## Installation
 
 1. Install the browser extension [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/)
-2. Click [HERE](https://github.com/xiaoyihao001018/xhs-web-exporter/releases/latest/download/xhs-web-exporter.user.js) to install the user script
+2. Click [HERE](https://github.com/heixxxa/xhs-web-exporter/releases/latest/download/xhs-web-exporter.user.js) to install the user script

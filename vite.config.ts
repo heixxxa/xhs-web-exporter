@@ -48,15 +48,15 @@ export default defineConfig({
           '': 'Export notes, comments and much more to JSON/CSV/HTML from Xiaohongshu web app.',
           'zh-CN': '从小红书网页版导出笔记、评论等数据为 JSON/CSV/HTML。',
         },
-        namespace: 'https://github.com/prinsss',
+        namespace: 'https://github.com/heixxxa',
         icon: 'https://companieslogo.com/img/orig/xiaohongshu-81d36809.png',
         match: ['https://www.xiaohongshu.com/*'],
         grant: ['unsafeWindow', 'GM_registerMenuCommand'],
         'run-at': 'document-start',
         updateURL:
-          'https://github.com/prinsss/twitter-web-exporter/releases/latest/download/twitter-web-exporter.user.js',
+          'https://github.com/heixxxa/xhs-web-exporter/releases/latest/download/xhs-web-exporter.user.js',
         downloadURL:
-          'https://github.com/prinsss/twitter-web-exporter/releases/latest/download/twitter-web-exporter.user.js',
+          'https://github.com/heixxxa/xhs-web-exporter/releases/latest/download/xhs-web-exporter.user.js',
         require: [
           'https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js',
           'https://cdn.jsdelivr.net/npm/dexie@4.0.11/dist/dexie.min.js',
