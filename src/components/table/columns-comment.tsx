@@ -1,11 +1,11 @@
-// src/components/table/columns-comment.tsx
 import { createColumnHelper } from '@tanstack/table-core';
+import { options } from '@/core/options';
 import { XHSComment } from '@/types/xhs';
+import { formatDateTime } from '@/utils/common';
 
 const columnHelper = createColumnHelper<XHSComment>();
 
 export const columns = [
-  // Selection checkbox
   columnHelper.display({
     id: 'select',
     header: ({ table }) => (
@@ -28,13 +28,11 @@ export const columns = [
       />
     ),
   }),
-  // Index
   columnHelper.display({
     id: 'index',
     header: '#',
     cell: (info) => info.row.index + 1,
   }),
-  // Avatar & Username
   columnHelper.accessor('user', {
     header: 'User',
     cell: (info) => {
@@ -54,7 +52,6 @@ export const columns = [
       );
     },
   }),
-  // Comment Content
   columnHelper.accessor('content', {
     header: 'Content',
     cell: (info) => (
@@ -72,18 +69,16 @@ export const columns = [
       </div>
     ),
   }),
-  // Likes
   columnHelper.accessor('like_count', {
     header: 'Likes',
     cell: (info) => <div class="text-center font-mono">{info.getValue()}</div>,
   }),
-  // Date
   columnHelper.accessor('upload_time', {
     header: 'Date',
     cell: (info) => {
       const time = info.getValue();
       if (!time) return '-';
-      return <div class="text-xs">{new Date(time).toLocaleString()}</div>;
+      return <div class="text-xs">{formatDateTime(time, options.get('dateTimeFormat'))}</div>;
     },
   }),
 ];

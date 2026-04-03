@@ -1,5 +1,7 @@
 import { createColumnHelper } from '@tanstack/table-core';
+import { options } from '@/core/options';
 import { XHSNote } from '@/types/xhs';
+import { formatDateTime } from '@/utils/common';
 
 const columnHelper = createColumnHelper<XHSNote>();
 
@@ -34,7 +36,7 @@ export const columns = [
             {note.desc}
           </div>
           <div class="text-xs opacity-50 mt-1">
-            {new Date(note.upload_time).toLocaleDateString()}
+            {formatDateTime(note.upload_time, options.get('dateTimeFormat'))}
           </div>
         </div>
       );

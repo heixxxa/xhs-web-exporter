@@ -23,11 +23,8 @@ export type Interceptor = (
  * Which kind of data the extension works with.
  */
 export enum ExtensionType {
-  TWEET = 'tweet',
-  USER = 'user',
   NOTE = 'note',
   COMMENT = 'comment',
-  CUSTOM = 'custom',
   NONE = 'none',
 }
 

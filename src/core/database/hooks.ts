@@ -1,7 +1,6 @@
-import { ExtensionType } from '@/core/extensions';
 import { db } from '@/core/database';
-import { Tweet, User } from '@/types';
-import { XHSNote, XHSComment } from '@/types/xhs';
+import { ExtensionType } from '@/core/extensions';
+import { XHSComment, XHSNote } from '@/types/xhs';
 import logger from '@/utils/logger';
 import { useLiveQuery } from '@/utils/observable';
 
@@ -10,20 +9,9 @@ export function useCaptureCount(extName: string) {
 }
 
 export function useCapturedRecords(extName: string, type: ExtensionType) {
-  return useLiveQuery<
-    Tweet[] | User[] | XHSNote[] | XHSComment[] | void,
-    Tweet[] | User[] | XHSNote[] | XHSComment[] | void
-  >(
+  return useLiveQuery<XHSNote[] | XHSComment[], XHSNote[] | XHSComment[]>(
     () => {
       logger.debug('useCapturedRecords liveQuery re-run', extName);
-
-      if (type === ExtensionType.USER) {
-        return db.extGetCapturedUsers(extName);
-      }
-
-      if (type === ExtensionType.TWEET) {
-        return db.extGetCapturedTweets(extName);
-      }
 
       if (type === ExtensionType.NOTE) {
         return db.extGetCapturedXHSNotes(extName);
@@ -32,8 +20,10 @@ export function useCapturedRecords(extName: string, type: ExtensionType) {
       if (type === ExtensionType.COMMENT) {
         return db.extGetCapturedXHSComments(extName);
       }
+
+      return Promise.resolve([]);
     },
-    [extName],
+    [extName, type],
     [],
   );
 }

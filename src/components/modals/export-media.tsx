@@ -9,22 +9,17 @@ import {
   IconInfoCircle,
 } from '@tabler/icons-preact';
 
+import { Modal, MultiSelect } from '@/components/common';
+import { TranslationKey, useTranslation } from '@/i18n';
+import { XHSComment, XHSNote } from '@/types/xhs';
 import { FileLike, ProgressCallback, zipStreamDownload } from '@/utils/download';
 import {
-  DEFAULT_MEDIA_TYPES,
   ExportMediaContext,
   ExportableMediaType,
-  USER_MEDIA_TYPES,
   XHS_MEDIA_TYPES,
   extractMedia,
-  patterns,
 } from '@/utils/media';
-import { Modal, MultiSelect } from '@/components/common';
-import { options } from '@/core/options';
-import { TranslationKey, useTranslation } from '@/i18n';
-import { Tweet, User } from '@/types';
-import { XHSComment, XHSNote } from '@/types/xhs';
-import { useSignalState, cx, useToggle } from '@/utils/common';
+import { cx, useSignalState, useToggle } from '@/utils/common';
 import logger from '@/utils/logger';
 
 type ExportMediaModalProps<T> = {
@@ -35,7 +30,7 @@ type ExportMediaModalProps<T> = {
   onClose?: () => void;
 };
 
-type MediaFilterType = ExportableMediaType | 'retweet';
+type MediaFilterType = ExportableMediaType;
 
 function sanitizeDownloadFilename(value: string) {
   const sanitized = Array.from(value)
@@ -58,54 +53,32 @@ function sanitizeDownloadFilename(value: string) {
 export function ExportMediaModal<T>({
   title,
   table,
-  context = 'tweet',
+  context = 'note',
   show,
   onClose,
 }: ExportMediaModalProps<T>) {
   const { t } = useTranslation('exporter');
-  const showFilenameTemplate = context === 'tweet';
-  const supportsRetweets = context === 'tweet';
-  const supportedMediaTypes =
-    context === 'user'
-      ? USER_MEDIA_TYPES
-      : context === 'note' || context === 'comment'
-        ? XHS_MEDIA_TYPES
-        : DEFAULT_MEDIA_TYPES;
-  const mediaDescription =
-    context === 'note' || context === 'comment'
-      ? t(
-          'Download and save media files referenced by the selected notes or comments. This may take a while depending on the amount of data. Media that will be downloaded includes note images, videos, and comment pictures.',
-        )
-      : t(
-          'Download and save media files from captured data. This may take a while depending on the amount of data. Media that will be downloaded includes: profile images, profile banners (for users), images, videos (for tweets).',
-        );
-
   const [loading, setLoading] = useSignalState(false);
   const [copied, setCopied] = useSignalState(false);
 
   const [useAria2Format, toggleUseAria2Format] = useToggle(false);
   const [rateLimit, setRateLimit] = useSignalState(1000);
-  const [filenamePattern, setFilenamePattern] = useSignalState(options.get('filenamePattern'));
   const [currentProgress, setCurrentProgress] = useSignalState(0);
   const [totalProgress, setTotalProgress] = useSignalState(0);
   const taskStatusSignal = useSignal<Record<string, number>>({});
 
-  // Media type filters.
-  const [filters, setFilters] = useSignalState<MediaFilterType[]>([
-    ...supportedMediaTypes,
-    ...(supportsRetweets ? ['retweet' as const] : []),
-  ]);
-
-  const includeRetweets = filters.includes('retweet');
+  const [filters, setFilters] = useSignalState<MediaFilterType[]>([...XHS_MEDIA_TYPES]);
   const archiveFilename = `media-${sanitizeDownloadFilename(title)}-${Date.now()}.zip`;
+  const mediaDescription =
+    context === 'comment'
+      ? t(
+          'Download and save media files referenced by the selected comments. This may take a while depending on the amount of data. Supported downloads include comment pictures.',
+        )
+      : t(
+          'Download and save media files referenced by the selected notes. This may take a while depending on the amount of data. Supported downloads include note images and videos.',
+        );
   const mediaList = extractMedia(
-    table.getSelectedRowModel().rows.map((row) => row.original) as
-      | Tweet[]
-      | User[]
-      | XHSNote[]
-      | XHSComment[],
-    includeRetweets,
-    filenamePattern ?? '',
+    table.getSelectedRowModel().rows.map((row) => row.original) as Array<XHSNote | XHSComment>,
   ).filter((media) => filters.includes(media.type as MediaFilterType));
 
   const onProgress: ProgressCallback<FileLike> = (current, total, value) => {
@@ -158,7 +131,6 @@ export function ExportMediaModal<T>({
       show={show}
       onClose={onClose}
     >
-      {/* Modal content. */}
       <div class="px-4 text-base overflow-y-scroll overscroll-none">
         <p class="text-base-content text-opacity-60 leading-5 text-sm">{mediaDescription}</p>
         <div role="alert" class="alert text-sm py-2 mt-2 mb-2 grid-cols-[auto_minmax(auto,1fr)]">
@@ -169,29 +141,6 @@ export function ExportMediaModal<T>({
             )}
           </span>
         </div>
-        {/* Export options. */}
-        {showFilenameTemplate && (
-          <div class="flex flex-wrap sm:grid grid-cols-4 sm:gap-2 items-center sm:h-9">
-            <p class="leading-8">{t('Filename template:')}</p>
-            <div
-              class="tooltip tooltip-bottom col-span-3 before:whitespace-pre-line before:max-w-max"
-              data-tip={Object.entries(patterns)
-                .map(([key, value]) => `{${key}} - ${t(value.description as TranslationKey)}`)
-                .reduce((acc, cur) => acc + cur + '\n', '')}
-            >
-              <input
-                type="text"
-                class="input input-bordered input-sm w-full"
-                value={filenamePattern}
-                onChange={(e) => {
-                  const value = (e?.target as HTMLInputElement)?.value;
-                  setFilenamePattern(value);
-                  options.set('filenamePattern', value);
-                }}
-              />
-            </div>
-          </div>
-        )}
         <div class="flex flex-wrap sm:grid grid-cols-4 sm:gap-2 items-center sm:h-9">
           <p class="leading-8 col-span-1 whitespace-nowrap">{t('Rate limit (ms):')}</p>
           <input
@@ -228,20 +177,14 @@ export function ExportMediaModal<T>({
           <p class="leading-8">{t('Media Filter:')}</p>
           <MultiSelect<MediaFilterType>
             class="col-span-3"
-            options={[
-              ...supportedMediaTypes.map((type) => ({
-                label: t(`filter.${type}` as TranslationKey),
-                value: type,
-              })),
-              ...(supportsRetweets
-                ? [{ label: t('filter.retweet'), value: 'retweet' as const }]
-                : []),
-            ]}
+            options={XHS_MEDIA_TYPES.map((type) => ({
+              label: t(`filter.${type}` as TranslationKey),
+              value: type,
+            }))}
             selected={filters}
             onChange={setFilters}
           />
         </div>
-        {/* Media list preview. */}
         <div class="my-3 overflow-x-scroll">
           <table class="table table-xs table-zebra">
             <thead>
@@ -286,7 +229,6 @@ export function ExportMediaModal<T>({
             </div>
           )}
         </div>
-        {/* Progress bar. */}
         <div class="flex flex-col mt-6">
           <progress
             class="progress progress-secondary w-full"
@@ -298,7 +240,6 @@ export function ExportMediaModal<T>({
           </span>
         </div>
       </div>
-      {/* Action buttons. */}
       <div class="flex space-x-2 mt-2">
         <span class="flex-grow" />
         <button class="btn" onClick={onClose}>
