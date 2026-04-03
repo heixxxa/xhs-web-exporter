@@ -9,6 +9,10 @@ import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 import prefixSelector from 'postcss-prefix-selector';
 import remToPx from 'postcss-rem-to-pixel-next';
+import { APP_ROOT_ID } from './src/constants/app';
+
+const appRootSelector = `#${APP_ROOT_ID}`;
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -28,8 +32,8 @@ export default defineConfig({
         remToPx({ propList: ['*'] }),
         // Use scoped CSS.
         prefixSelector({
-          prefix: '#twe-root',
-          exclude: [/^#twe-root/], // This may be a bug.
+          prefix: appRootSelector,
+          exclude: [new RegExp(`^${escapeRegExp(appRootSelector)}`)],
         }),
       ],
     },

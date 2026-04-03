@@ -14,6 +14,20 @@ const globalObject = unsafeWindow ?? window ?? globalThis;
  */
 const xhrOpen = globalObject.XMLHttpRequest.prototype.open;
 
+function getFetchRequestInfo(resource: RequestInfo | URL, config?: RequestInit) {
+  const requestLike =
+    typeof resource === 'object' && resource !== null && 'url' in resource
+      ? (resource as Pick<Request, 'method' | 'url'>)
+      : null;
+
+  const url =
+    typeof resource === 'string' ? resource : (requestLike?.url ?? resource?.toString?.() ?? '');
+
+  const method = config?.method || requestLike?.method || 'GET';
+
+  return { method, url };
+}
+
 /**
  * The registry for all extensions.
  */
@@ -58,6 +72,16 @@ export class ExtensionManager {
    * Set up all enabled extensions.
    */
   public start() {
+    const registeredNames = new Set(this.extensions.keys());
+    const activeDisabledExtensions = [...this.disabledExtensions].filter((name) =>
+      registeredNames.has(name),
+    );
+
+    if (activeDisabledExtensions.length !== this.disabledExtensions.size) {
+      this.disabledExtensions = new Set(activeDisabledExtensions);
+      options.set('disabledExtensions', activeDisabledExtensions);
+    }
+
     for (const ext of this.extensions.values()) {
       if (this.disabledExtensions.has(ext.name)) {
         this.disable(ext.name);
@@ -142,13 +166,16 @@ export class ExtensionManager {
     logger.info('Hooked into XMLHttpRequest');
 
     // Hook into Window.fetch
-    const originalFetch = globalObject.fetch;
+    const originalFetch = globalObject.fetch?.bind(globalObject);
+    if (typeof originalFetch !== 'function') {
+      logger.warn('Window.fetch is not available, skipping fetch hook');
+      return;
+    }
+
     globalObject.fetch = async (...args) => {
       const [resource, config] = args;
       const response = await originalFetch(...args);
-
-      const url = resource.toString();
-      const method = config?.method || 'GET';
+      const { method, url } = getFetchRequestInfo(resource, config);
 
       if (manager.debugEnabled) {
         logger.debug(`Fetch finished`, { method, url });

@@ -18,7 +18,7 @@ import { db } from './database';
 export function App() {
   const { t } = useTranslation();
 
-  const extensions = useSignal<Extension[]>([]);
+  const extensions = useSignal<Extension[]>(extensionManager.getExtensions());
   const currentTheme = useSignal(options.get('theme'));
   const showControlPanel = useSignal(options.get('showControlPanel'));
 
@@ -30,17 +30,27 @@ export function App() {
 
   // Update UI when extensions or options change.
   useEffect(() => {
-    extensionManager.signal.subscribe(() => {
+    extensions.value = extensionManager.getExtensions();
+    currentTheme.value = options.get('theme');
+    showControlPanel.value = options.get('showControlPanel');
+
+    const unsubscribeExtensions = extensionManager.signal.subscribe(() => {
       extensions.value = extensionManager.getExtensions();
     });
 
-    options.signal.subscribe(() => {
+    const unsubscribeOptions = options.signal.subscribe(() => {
       currentTheme.value = options.get('theme');
+      showControlPanel.value = options.get('showControlPanel');
     });
 
     GM_registerMenuCommand(t('Open Control Panel'), toggleControlPanel);
 
     logger.debug('App useEffect executed');
+
+    return () => {
+      unsubscribeExtensions();
+      unsubscribeOptions();
+    };
   }, []);
 
   return (
