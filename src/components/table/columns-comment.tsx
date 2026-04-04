@@ -81,4 +81,12 @@ export const columns = [
       return <div class="text-xs">{formatDateTime(time, options.get('dateTimeFormat'))}</div>;
     },
   }),
+  columnHelper.accessor('captured_at', {
+    header: 'Captured At',
+    cell: (info) => {
+      const time = info.getValue();
+      if (!time) return '-';
+      return <div class="text-xs">{formatDateTime(time, options.get('dateTimeFormat'))}</div>;
+    },
+  }),
 ];

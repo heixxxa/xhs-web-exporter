@@ -9,6 +9,7 @@ export interface XHSNote {
   note_id: string;
   note_url: string;
   note_type: 'normal' | 'video';
+  captured_at?: number;
   user: XHSUser;
   title: string;
   desc: string;
@@ -27,6 +28,7 @@ export interface XHSComment {
   comment_id: string;
   note_id: string;
   note_url: string;
+  captured_at?: number;
   user: XHSUser;
   content: string;
   like_count: number;

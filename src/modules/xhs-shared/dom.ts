@@ -3,6 +3,14 @@ import { normalizeXhsUrl } from './parsers';
 
 export const XHS_HOME_FEED_NOTE_CARD_SELECTOR = 'section.note-item';
 
+type NoteLinkCandidate = {
+  href: string;
+  noteId: string;
+  hasHash: boolean;
+  hasQuery: boolean;
+  isCanonicalId: boolean;
+};
+
 function getTextContent(root: ParentNode, selectors: string[]) {
   for (const selector of selectors) {
     const text = root.querySelector(selector)?.textContent?.trim();
@@ -47,16 +55,75 @@ function parseCount(raw: string) {
 }
 
 function extractNoteHref(card: Element) {
-  const links = Array.from(card.querySelectorAll<HTMLAnchorElement>('a[href*="/explore/"]'));
-  const canonicalLink = links.find((link) => !(link.getAttribute('href') || '').includes('?'));
+  const candidates = Array.from(card.querySelectorAll<HTMLAnchorElement>('a[href*="/explore/"]'))
+    .map((link) => parseNoteLinkCandidate(link.getAttribute('href') || link.href || ''))
+    .filter((candidate): candidate is NoteLinkCandidate => !!candidate)
+    .sort((a, b) => scoreNoteLinkCandidate(b) - scoreNoteLinkCandidate(a));
 
-  return (
-    canonicalLink?.getAttribute('href')?.trim() || links[0]?.getAttribute('href')?.trim() || ''
-  );
+  return candidates[0]?.href || '';
 }
 
 function extractNoteId(href: string) {
-  return href.match(/\/explore\/([^/?]+)/)?.[1] || '';
+  const candidate = parseNoteLinkCandidate(href);
+
+  if (!candidate) {
+    return '';
+  }
+
+  if (candidate.isCanonicalId) {
+    return candidate.noteId;
+  }
+
+  return !candidate.hasHash && !candidate.noteId.includes('-') ? candidate.noteId : '';
+}
+
+function parseNoteLinkCandidate(href: string): NoteLinkCandidate | null {
+  const rawHref = href.trim();
+  if (!rawHref) {
+    return null;
+  }
+
+  try {
+    const url = new URL(rawHref, location.origin);
+    const noteId = url.pathname.match(/^\/explore\/([^/]+)/)?.[1]?.trim() || '';
+
+    if (!noteId) {
+      return null;
+    }
+
+    return {
+      href: rawHref,
+      noteId,
+      hasHash: !!url.hash,
+      hasQuery: !!url.search,
+      isCanonicalId: /^[0-9a-f]{24}$/i.test(noteId),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function scoreNoteLinkCandidate(candidate: NoteLinkCandidate) {
+  let score = 0;
+
+  if (candidate.isCanonicalId) {
+    score += 100;
+  }
+
+  if (!candidate.hasHash) {
+    score += 20;
+  }
+
+  // XHS often appends tracking params to the real note link, so query params are a weak signal.
+  if (!candidate.hasQuery) {
+    score += 10;
+  }
+
+  if (!candidate.noteId.includes('-')) {
+    score += 5;
+  }
+
+  return score;
 }
 
 function extractUserId(card: Element) {

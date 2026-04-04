@@ -82,12 +82,12 @@ export class DatabaseManager {
 
   async extGetCapturedXHSNotes(extName: string) {
     const captures = await this.extGetCaptures(extName);
-    if (!captures) {
+    if (captures.length === 0) {
       return [];
     }
 
     const noteIds = captures.map((capture) => capture.data_key);
-    return this.xhsNotes()
+    const notes = await this.xhsNotes()
       .where('note_id')
       .anyOf(noteIds)
       .toArray()
@@ -95,16 +95,18 @@ export class DatabaseManager {
         this.logError(error);
         return [];
       });
+
+    return this.mergeCaptureMetadata(captures, notes, (note) => note.note_id);
   }
 
   async extGetCapturedXHSComments(extName: string) {
     const captures = await this.extGetCaptures(extName);
-    if (!captures) {
+    if (captures.length === 0) {
       return [];
     }
 
     const commentIds = captures.map((capture) => capture.data_key);
-    return this.xhsComments()
+    const comments = await this.xhsComments()
       .where('comment_id')
       .anyOf(commentIds)
       .toArray()
@@ -112,6 +114,8 @@ export class DatabaseManager {
         this.logError(error);
         return [];
       });
+
+    return this.mergeCaptureMetadata(captures, comments, (comment) => comment.comment_id);
   }
 
   /*
@@ -123,6 +127,7 @@ export class DatabaseManager {
   async extAddXHSNotes(extName: string, notes: XHSNote[]) {
     if (notes.length === 0) return;
 
+    const capturedAt = Date.now();
     await this.xhsNotes().bulkPut(notes);
     await this.upsertCaptures(
       notes.map((note) => ({
@@ -130,7 +135,7 @@ export class DatabaseManager {
         extension: extName,
         type: ExtensionType.NOTE,
         data_key: note.note_id,
-        created_at: Date.now(),
+        created_at: capturedAt,
       })),
     );
   }
@@ -138,6 +143,7 @@ export class DatabaseManager {
   async extAddXHSComments(extName: string, comments: XHSComment[]) {
     if (comments.length === 0) return;
 
+    const capturedAt = Date.now();
     await this.xhsComments().bulkPut(comments);
     await this.upsertCaptures(
       comments.map((comment) => ({
@@ -145,7 +151,7 @@ export class DatabaseManager {
         extension: extName,
         type: ExtensionType.COMMENT,
         data_key: comment.comment_id,
-        created_at: Date.now(),
+        created_at: capturedAt,
       })),
     );
   }
@@ -209,6 +215,21 @@ export class DatabaseManager {
         return this.captures().bulkPut(captures).catch(this.logError);
       })
       .catch(this.logError);
+  }
+
+  private mergeCaptureMetadata<T extends { captured_at?: number }>(
+    captures: Capture[],
+    records: T[],
+    getDataKey: (record: T) => string,
+  ) {
+    const recordMap = new Map(records.map((record) => [getDataKey(record), record]));
+
+    return [...captures]
+      .sort((a, b) => b.created_at - a.created_at)
+      .flatMap((capture) => {
+        const record = recordMap.get(capture.data_key);
+        return record ? [{ ...record, captured_at: capture.created_at }] : [];
+      });
   }
 
   async deleteAllXHSNotes() {
